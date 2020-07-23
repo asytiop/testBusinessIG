@@ -6,8 +6,9 @@ import android.util.Log
 import com.parse.Parse
 import com.parse.ParseObject
 import io.symbyoz.testbusinessig.core.PARSE
+import io.symbyoz.testbusinessig.model.MediaMetrics
 import io.symbyoz.testbusinessig.model.UserData
-import io.symbyoz.testbusinessig.model.UserMedia
+import io.symbyoz.testbusinessig.model.UserMetrics
 
 class TestBusiness : Application() {
     companion object
@@ -31,7 +32,8 @@ class TestBusiness : Application() {
         Log.d(TAG, "initSDK()")
 
         ParseObject.registerSubclass(UserData::class.java)
-        ParseObject.registerSubclass(UserMedia::class.java)
+        ParseObject.registerSubclass(UserMetrics::class.java)
+        ParseObject.registerSubclass(MediaMetrics::class.java)
 
         // PARSE
         Parse.initialize(
