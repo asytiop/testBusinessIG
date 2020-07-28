@@ -2,33 +2,27 @@ package io.symbyoz.testbusinessig.webservice
 
 import android.util.Log
 import com.parse.ParseException
-import com.parse.ktx.delegates.booleanAttribute
-import com.parse.ktx.delegates.intAttribute
-import com.parse.ktx.delegates.jsonArrayAttribute
-import com.parse.ktx.delegates.stringAttribute
 import io.symbyoz.testbusinessig.model.MediaMetrics
 import io.symbyoz.testbusinessig.model.UserData
 import io.symbyoz.testbusinessig.model.UserMetrics
-import org.json.JSONArray
+import org.json.JSONObject
 
 class ParseAPI
 {
     companion object
     {
-        fun sendUserData(userId: String, name: String, userName: String, biography: String,
-                         followersCount: String, followCount: String, media_count: String,
-                         profile_picture_url: String)
+        fun sendUserData(userDataJSON: JSONObject)
         {
             val userData = UserData()
 
-            userData.user_id = userId
-            userData.name = name
-            userData.username = userName
-            userData.biography = biography
-            userData.followers_count = followersCount
-            userData.follow_count = followCount
-            userData.media_count = media_count
-            userData.profile_picture_url = profile_picture_url
+            userData.user_id = userDataJSON.optString("ig_id")
+            userData.name = userDataJSON.optString("name")
+            userData.username = userDataJSON.optString("username")
+            userData.biography = userDataJSON.optString("biography")
+            userData.followers_count = userDataJSON.optString("followers_count")
+            userData.follow_count = userDataJSON.optString("follow_count")
+            userData.media_count = userDataJSON.optString("media_count")
+            userData.profile_picture_url = userDataJSON.optString("profile_picture_url")
 
             Log.d("sendUserData()", userData.getString("client_id"))
 
@@ -46,24 +40,21 @@ class ParseAPI
             }
         }
 
-        fun sendMediaMetrics(
-            media_id: String, username: String, caption: String, comments_count: Int, is_comment_enabled: Boolean,
-            like_count: Int, media_type: String, media_url: String, permalink: String, shortcode: String,
-            timestamp: String)
+        fun sendMediaMetrics(mediaMetricsJSON: JSONObject)
         {
             val mediaMetrics = MediaMetrics()
 
-            mediaMetrics.media_id = media_id
-            mediaMetrics.username = username
-            mediaMetrics.caption = caption
-            mediaMetrics.comments_count = comments_count
-            mediaMetrics.is_comment_enabled = is_comment_enabled
-            mediaMetrics.like_count = like_count
-            mediaMetrics.media_type = media_type
-            mediaMetrics.media_url = media_url
-            mediaMetrics.permalink = permalink
-            mediaMetrics.shortcode = shortcode
-            mediaMetrics.timestamp = timestamp
+            mediaMetrics.media_id = mediaMetricsJSON.optString("id")
+            mediaMetrics.username = mediaMetricsJSON.optString("username")
+            mediaMetrics.caption = mediaMetricsJSON.optString("caption")
+            mediaMetrics.comments_count = mediaMetricsJSON.optInt("comments_count")
+            mediaMetrics.is_comment_enabled = mediaMetricsJSON.optBoolean("is_comment_enabled")
+            mediaMetrics.like_count = mediaMetricsJSON.optInt("like_count")
+            mediaMetrics.media_type = mediaMetricsJSON.optString("media_type")
+            mediaMetrics.media_url = mediaMetricsJSON.optString("media_url")
+            mediaMetrics.permalink = mediaMetricsJSON.optString("permalink")
+            mediaMetrics.shortcode = mediaMetricsJSON.optString("shortcode")
+            mediaMetrics.timestamp = mediaMetricsJSON.optString("timestamp")
 
             Log.d("sendMediaMetrics()", mediaMetrics.getString("client_id"))
 
@@ -81,27 +72,24 @@ class ParseAPI
             }
         }
 
-        fun sendUserMetrics(audience_city: JSONArray, audience_country: JSONArray, audience_gender_age: JSONArray,
-                            audience_locale: JSONArray, email_contacts: Int, follower_count: Int, get_directions_clicks: Int, impressions: Int,
-                            online_followers: Int, phone_call_clicks: Int, profile_views: Int, reach: Int,
-                            text_message_clicks: Int, website_clicks: Int)
+        fun sendUserMetrics(userMetricsJSON: JSONObject)
         {
             val userMetrics = UserMetrics()
 
-            userMetrics.audience_city = audience_city
-            userMetrics.audience_country = audience_country
-            userMetrics.audience_gender_age = audience_gender_age
-            userMetrics.audience_locale = audience_locale
-            userMetrics.email_contacts = email_contacts
-            userMetrics.follower_count = follower_count
-            userMetrics.get_directions_clicks = get_directions_clicks
-            userMetrics.impressions = impressions
-            userMetrics.online_followers = online_followers
-            userMetrics.phone_call_clicks = phone_call_clicks
-            userMetrics.profile_views = profile_views
-            userMetrics.reach = reach
-            userMetrics.text_message_clicks = text_message_clicks
-            userMetrics.website_clicks = website_clicks
+            userMetrics.audience_city = userMetricsJSON.optJSONArray("audience_city")
+            userMetrics.audience_country = userMetricsJSON.optJSONArray("audience_country")
+            userMetrics.audience_gender_age = userMetricsJSON.optJSONArray("audience_gender_age")
+            userMetrics.audience_locale = userMetricsJSON.optJSONArray("audience_locale")
+            userMetrics.email_contacts = userMetricsJSON.optInt("email_contacts")
+            userMetrics.follower_count = userMetricsJSON.optInt("follower_count")
+            userMetrics.get_directions_clicks = userMetricsJSON.optInt("get_directions_clicks")
+            userMetrics.impressions = userMetricsJSON.optInt("impressions")
+            userMetrics.online_followers = userMetricsJSON.optInt("online_followers")
+            userMetrics.phone_call_clicks = userMetricsJSON.optInt("phone_call_clicks")
+            userMetrics.profile_views = userMetricsJSON.optInt("profile_view")
+            userMetrics.reach = userMetricsJSON.optInt("reach")
+            userMetrics.text_message_clicks = userMetricsJSON.optInt("text_message_clicks")
+            userMetrics.website_clicks = userMetricsJSON.optInt("website_clicks")
 
 
             Log.d("sendUserMetrics()", userMetrics.toString())

@@ -16,13 +16,20 @@ import com.facebook.FacebookSdk
 import com.facebook.appevents.AppEventsLogger
 import com.facebook.login.LoginResult
 import com.facebook.login.widget.LoginButton
+import com.parse.Parse
 import io.symbyoz.testbusinessig.R
+import org.json.JSONArray
 import org.json.JSONObject
 
 class IGBusinessAPI: AppCompatActivity()
 {
 
     private lateinit var token: String
+    private lateinit var igUserId: String
+    private lateinit var fbPageId: String
+
+    private lateinit var userMediaIdArray: JSONArray
+
     private lateinit var loginButton: LoginButton
     private lateinit var callbackManager: CallbackManager
 
@@ -37,12 +44,6 @@ class IGBusinessAPI: AppCompatActivity()
         ctx = applicationContext
 
         initSDK()
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
-    {
-        callbackManager.onActivityResult(requestCode, resultCode, data)
-        super.onActivityResult(requestCode, resultCode, data)
     }
 
     private fun initSDK()
@@ -60,7 +61,6 @@ class IGBusinessAPI: AppCompatActivity()
                 token = loginResult.accessToken.token.toString()
 
                 Log.d("Main activity", loginResult.accessToken.token.toString())
-                getFbUserPages()
             }
             override fun onCancel() {
                 // App code
@@ -69,78 +69,33 @@ class IGBusinessAPI: AppCompatActivity()
                 // App code
             }
         })
+
+        getFbPageId()
+        getUserId()
+        getUserMedia()
     }
 
-    private fun getHttpRequest(url: String, TAG: String)
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
     {
-        val queue = Volley.newRequestQueue(this)
-
-        val stringRequest =
-            StringRequest(Request.Method.GET, url, Response.Listener<String> { response ->
-
-                val resJSON = JSONObject(response)
-
-                /*sendUserInfo(resJSON.optString("id"),
-                    resJSON.optString("username"),
-                    resJSON.optInt("media_count"))*/
-
-                Log.d(TAG, resJSON.toString())
-            }, Response.ErrorListener { error ->  Log.d(TAG, error.toString())})
-
-        queue.add(stringRequest)
-    }
-
-    private fun postHttpRequest(url: String, TAG: String)
-    {
-        val queue = Volley.newRequestQueue(this)
-
-        val stringRequest =
-            StringRequest(Request.Method.POST, url, Response.Listener<String> { response ->
-
-                val resJSON = JSONObject(response)
-
-                /*sendUserInfo(resJSON.optString("id"),
-                    resJSON.optString("username"),
-                    resJSON.optInt("media_count"))*/
-
-                Log.d(TAG, resJSON.toString())
-
-            }, Response.ErrorListener { error ->  Log.d(TAG, error.toString())})
-
-        queue.add(stringRequest)
-    }
-
-    private fun deleteHttpRequest(url: String, TAG: String)
-    {
-        val queue = Volley.newRequestQueue(this)
-
-        val stringRequest =
-            StringRequest(Request.Method.DELETE, url, Response.Listener<String> { response ->
-
-                val resJSON = JSONObject(response)
-
-                /*sendUserInfo(resJSON.optString("id"),
-                    resJSON.optString("username"),
-                    resJSON.optInt("media_count"))*/
-
-                Log.d(TAG, resJSON.toString())
-
-            }, Response.ErrorListener { error ->  Log.d(TAG, error.toString())})
-
-        queue.add(stringRequest)
+        callbackManager.onActivityResult(requestCode, resultCode, data)
+        super.onActivityResult(requestCode, resultCode, data)
     }
 
     /*
-    Get all replies on a comment
+    Get all replies under a comment
      */
-    fun getAllReplies(igCommentId: String)
-    {
+    fun getAllReplies(igCommentId: String) {
         val TAG = "getAllReplies"
         val url  = "graph.facebook.com/" +
                 igCommentId +
                 "/replies"
 
-        getHttpRequest(url, TAG)
+        getHttpRequest(url, TAG) {isSuccess, response ->
+            if(isSuccess)
+            {
+                Log.d(TAG, response.toString())
+            }
+        }
 
     }
 
@@ -172,7 +127,12 @@ class IGBusinessAPI: AppCompatActivity()
                 igCommentId +
                 "?fields" + "hidden,id,like_count,replies,media,text,timestamp,username"
 
-        getHttpRequest(url, TAG)
+        getHttpRequest(url, TAG){isSuccess, response ->
+            if(isSuccess)
+            {
+                Log.d(TAG, response.toString())
+            }
+        }
 
     }
 
@@ -187,49 +147,69 @@ class IGBusinessAPI: AppCompatActivity()
                 "?hide=" + isHide
 
         postHttpRequest(url, TAG)
-
     }
 
     /*
     Get top media of an hashtag id
      */
-    fun getTopMedia(userId: String, hashtagId: String)
+    fun getTopMedia(hashtagId: String)
     {
         val TAG = "getTopMedia"
         val url = "graph.facebook.com/" +
                 hashtagId + "/top_media" +
-                "?user_id=" + userId +
+                "?user_id=" + igUserId +
                 "&fields=" + "caption, comments_count,id ,like_count,media_type,media_url,permalink,timestamp"
 
-        getHttpRequest(url, TAG)
+        getHttpRequest(url, TAG) {isSuccess, response ->
+            if(isSuccess)
+            {
+                response.toString()
+            }
+        }
 
     }
 
     /*
     Get recent media of an hashtag id
      */
-    fun getRecentMedia(userId: String, hashtagId: String)
+    fun getRecentMedia(hashtagId: String)
     {
         val TAG = "getRecentMedia"
         val url = "graph.facebook.com/" +
                 hashtagId + "/recent_media" +
-                "?user_id=" + userId +
+                "?user_id=" + igUserId +
                 "&fields=" + "caption, comments_count,id ,like_count,media_type,media_url,permalink,timestamp"
 
-        getHttpRequest(url, TAG)
+        getHttpRequest(url, TAG){isSuccess, response ->
+            if(isSuccess)
+            {
+                Log.d(TAG, response.toString())
+            }
+        }
     }
 
     /*
-    getRecentMedia() and getTopMedia() of with hashtag results id
+     Get HashtagId then getTopMedia() and getRecentMedia()
      */
-    fun hashtagSearch(userId: String, hashtag: String)
+    fun hashtagSearch(hashtag: String)
     {
         val TAG = "hashtagSearch"
         val url = "graph.facebook.com/ig_hashtag_search" +
-                "?user_id=" + userId +
+                "?user_id=" + igUserId +
                 "&query=" + hashtag
 
-        getHttpRequest(url, TAG)
+        getHttpRequest(url, TAG){isSuccess, response ->
+            if(isSuccess)
+            {
+                val data = response.optJSONArray("data")
+                val hashtagId = data?.optString(0)
+
+                if (hashtagId != null) {
+                    getTopMedia(hashtagId)
+                    getRecentMedia(hashtagId)
+                }
+            }
+        }
 
     }
 
@@ -270,21 +250,15 @@ class IGBusinessAPI: AppCompatActivity()
                 "?fields=" + "id,username,caption,comments_count,id,is_comment_enabled,like_count,media_type,media_url,permalink,shortcode,thumbnail_url,timestamp" +
                 "&access_token=" + token
 
-        getHttpRequest(url, TAG)
+        getHttpRequest(url, TAG) {isSuccess, response ->
+            if(isSuccess)
+            {
+                ParseAPI.sendMediaMetrics(response)
+            }
+        }
     }
 
-    //Max can get : 10K media
-    fun getUserMedia( igUserId: String)
-    {
-        val TAG = "getUserMedia"
-        val url = "https://graph.facebook.com/" +
-                igUserId +
-                "/media"
-
-        getHttpRequest(url, TAG)
-    }
-
-    fun getUserData(igUserId: String)
+    fun getUserData()
     {
         val TAG = "getUserData"
         val url = "https://graph.facebook.com/" +
@@ -292,10 +266,111 @@ class IGBusinessAPI: AppCompatActivity()
                 "?fields=" + "ig_id,name,username,biography,followers_count,follow_count,media_count,profile_picture_url" +
                 "&access_token" + token
 
-        getHttpRequest(url, TAG)
+        getHttpRequest(url, TAG) {isSuccess, response ->
+            if(isSuccess)
+            {
+                ParseAPI.sendUserData(response)
+            }
+        }
     }
 
-    fun getInstagramPageId(fbPageId: String)
+    /*
+    metricsPeriod :"day","week","days_28"
+     */
+    fun getUserMetrics(metricsPeriod: String)
+    {
+        val TAG = "getAccountMetrics"
+        val url = "https://graph.facebook.com/v7.0/"+
+                igUserId + "/insights" +
+                "?metrics=" + "audience_city,audience_country,audience_gender_age,audience_locale,email_contacts,follower_count," +
+                "get_directions_clicks,impressions,online_followers,phone_call_clicks,profile_views,reach,text_message_clicks,website_clicks" +
+                "&period=" + metricsPeriod +
+                //"&since=" + since +
+                //"&until=" + until +
+                "&access_token=" + token
+
+
+        getHttpRequest(url, TAG) { isSuccess, response ->
+            if(isSuccess)
+            {
+                ParseAPI.sendUserMetrics(response)
+            }
+        }
+    }
+
+    private fun getHttpRequest(url: String, TAG: String, listener: (isSuccess: Boolean, response: JSONObject) -> Unit)
+    {
+        val queue = Volley.newRequestQueue(this)
+
+        val stringRequest =
+            StringRequest(Request.Method.GET, url, Response.Listener<String> { response ->
+
+                val resJSON = JSONObject(response)
+                Log.d(TAG, resJSON.toString())
+                listener.invoke(true, resJSON)
+
+            }, Response.ErrorListener { error ->
+
+                Log.d(TAG, error.toString())
+                listener.invoke(false, JSONObject())
+
+            })
+
+        queue.add(stringRequest)
+    }
+
+    private fun postHttpRequest(url: String, TAG: String)
+    {
+        val queue = Volley.newRequestQueue(this)
+
+        val stringRequest =
+            StringRequest(Request.Method.POST, url, Response.Listener<String> { response ->
+
+                val resJSON = JSONObject(response)
+
+                Log.d(TAG, resJSON.toString())
+
+            }, Response.ErrorListener { error ->  Log.d(TAG, error.toString())})
+
+        queue.add(stringRequest)
+    }
+
+    private fun deleteHttpRequest(url: String, TAG: String)
+    {
+        val queue = Volley.newRequestQueue(this)
+
+        val stringRequest =
+            StringRequest(Request.Method.DELETE, url, Response.Listener<String> { response ->
+
+                val resJSON = JSONObject(response)
+
+                Log.d(TAG, resJSON.toString())
+
+            }, Response.ErrorListener { error ->  Log.d(TAG, error.toString())})
+
+        queue.add(stringRequest)
+    }
+
+    //Max can get : 10K media
+    private fun getUserMedia()
+    {
+        val TAG = "getUserMedia"
+        val url = "https://graph.facebook.com/" +
+                igUserId +
+                "/media"
+
+        getHttpRequest(url, TAG) {isSuccess, response ->
+            if(isSuccess)
+            {
+                userMediaIdArray = response.optJSONArray("data")
+            }
+        }
+    }
+
+    /*
+    Need a valid fbPageId
+    */
+    private fun getUserId()
     {
         val TAG = "getInstagramPageId"
         val url = "https://graph.facebook.com/v7.0/" +
@@ -311,14 +386,10 @@ class IGBusinessAPI: AppCompatActivity()
 
                 val resJSON = JSONObject(response)
                 val igBusinessAccount = resJSON.optJSONObject("instagram_business_account")
-                val igPageId = igBusinessAccount.optString("id")
 
-                /*sendUserInfo(resJSON.optString("id"),
-                    resJSON.optString("username"),
-                    resJSON.optInt("media_count"))*/
+                igUserId = igBusinessAccount.optString("id")
 
                 Log.d(TAG, resJSON.toString())
-                getUserData(igPageId)
 
             }, Response.ErrorListener { error ->  Log.d(TAG, error.toString())})
 
@@ -328,7 +399,7 @@ class IGBusinessAPI: AppCompatActivity()
     /*
 
      */
-    fun getFbUserPages()
+    private fun getFbPageId()
     {
         val TAG = "getFbUserPages"
         val url = "https://graph.facebook.com/v7.0/me/accounts" +
@@ -341,40 +412,13 @@ class IGBusinessAPI: AppCompatActivity()
 
                 val resJSON = JSONObject(response)
                 val userPagesData = resJSON.optJSONObject("data")
-                val userFbPageId = userPagesData.optString("id")
 
-                /*sendUserInfo(resJSON.optString("id"),
-                    resJSON.optString("username"),
-                    resJSON.optInt("media_count"))*/
+                fbPageId = userPagesData.optString("id")
 
                 Log.d(TAG, resJSON.toString())
-
-                getInstagramPageId(userFbPageId)
 
             }, Response.ErrorListener { error ->  Log.d(TAG, error.toString())})
 
         queue.add(stringRequest)
     }
-
-    /*
-    metricsPeriod :"day","week","days_28"
-     */
-    fun getAccountMetrics( igUserId: String, metricsPeriod: String)
-    {
-        val TAG = "getAccountMetrics"
-        val url = "https://graph.facebook.com/v7.0/"+
-                igUserId + "/insights" +
-                "?metrics=" + "audience_city,audience_country,audience_gender_age,audience_locale,email_contacts,follower_count," +
-                "get_directions_clicks,impressions,online_followers,phone_call_clicks,profile_views,reach,text_message_clicks,website_clicks" +
-                "&period=" + metricsPeriod +
-                //"&since=" + since +
-                //"&until=" + until +
-                "&access_token=" + token
-
-
-        getHttpRequest(url, TAG)
-    }
-
-
-
 }
