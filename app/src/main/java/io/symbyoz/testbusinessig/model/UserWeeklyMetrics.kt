@@ -5,8 +5,8 @@ import com.parse.ParseObject
 import com.parse.ktx.delegates.jsonArrayAttribute
 import org.json.JSONArray
 
-@ParseClassName("UserData")
-class UserData : ParseObject()
+@ParseClassName("UserWeeklyMetrics")
+class UserWeeklyMetrics: ParseObject()
 {
-    var userData: JSONArray? by jsonArrayAttribute()
+    var weeklyMetrics: JSONArray? by jsonArrayAttribute()
 }
