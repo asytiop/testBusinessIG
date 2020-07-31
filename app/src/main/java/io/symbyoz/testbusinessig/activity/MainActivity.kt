@@ -29,20 +29,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        btnUserData = findViewById(R.id.user_data_button)
-        btnUserMetrics = findViewById(R.id.user_metrics_button)
-        btnAllMediaMetrics = findViewById(R.id.all_media_metrics_button)
-
-        loginButton = findViewById(R.id.login_button)
-        loginButton.setReadPermissions("public_profile", "instagram_basic",
-                                        "instagram_manage_comments","email","pages_read_engagement",
-                                        "pages_show_list","instagram_manage_insights")
-
-        callbackManager = CallbackManager.Factory.create()
-
         initBusinessIgSDK()
 
-        loginButton.registerCallback(callbackManager, igBusiness.OnFacebookCallback())
+        initLoginButton()
 
         initButtons()
 
@@ -60,6 +49,18 @@ class MainActivity : AppCompatActivity() {
     // INIT METHODS
     // ============================================================================================
 
+    private fun initLoginButton()
+    {
+        loginButton = findViewById(R.id.login_button)
+        loginButton.setReadPermissions("public_profile", "instagram_basic",
+            "instagram_manage_comments","email","pages_read_engagement",
+            "pages_show_list","instagram_manage_insights")
+
+        callbackManager = CallbackManager.Factory.create()
+
+        loginButton.registerCallback(callbackManager, igBusiness.OnFacebookCallback())
+    }
+
     private fun initBusinessIgSDK()
     {
         val accessToken = AccessToken.getCurrentAccessToken()
@@ -73,6 +74,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun initButtons()
     {
+        btnUserData = findViewById(R.id.user_data_button)
+        btnUserMetrics = findViewById(R.id.user_metrics_button)
+        btnAllMediaMetrics = findViewById(R.id.all_media_metrics_button)
+
         btnUserData.setOnClickListener {btnUserDataOnClickListener()}
         btnUserMetrics.setOnClickListener {btnUserMetricsOnClickListener()}
         btnAllMediaMetrics.setOnClickListener { btnSendAllMediaMetricsOnClickListener() }
