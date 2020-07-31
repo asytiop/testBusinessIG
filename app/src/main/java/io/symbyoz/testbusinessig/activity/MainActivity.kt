@@ -2,12 +2,15 @@ package io.symbyoz.testbusinessig.activity
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.Toast
+import com.facebook.AccessToken
 import com.facebook.CallbackManager
 import com.facebook.login.widget.LoginButton
 import io.symbyoz.testbusinessig.R
 import io.symbyoz.testbusinessig.webservice.IGBusinessAPI
+import io.symbyoz.testbusinessig.webservice.ParseAPI
 
 
 class MainActivity : SuperActivity() {
@@ -18,6 +21,7 @@ class MainActivity : SuperActivity() {
 
     private lateinit var btnUserData: Button
     private lateinit var btnUserMetrics: Button
+    private lateinit var btnAllMediaMetrics: Button
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
@@ -26,6 +30,7 @@ class MainActivity : SuperActivity() {
 
         btnUserData = findViewById(R.id.user_data_button)
         btnUserMetrics = findViewById(R.id.user_metrics_button)
+        btnAllMediaMetrics = findViewById(R.id.all_media_metrics_button)
 
         loginButton = findViewById(R.id.login_button)
         loginButton.setReadPermissions("public_profile", "instagram_basic",
@@ -34,12 +39,13 @@ class MainActivity : SuperActivity() {
 
         callbackManager = CallbackManager.Factory.create()
 
-        igBusiness = IGBusinessAPI(this)
+        initBusinessIgSDK()
 
         loginButton.registerCallback(callbackManager, igBusiness.OnFacebookCallback())
 
         btnUserData.setOnClickListener {btnUserDataOnClickListener()}
         btnUserMetrics.setOnClickListener {btnUserMetricsOnClickListener()}
+        btnAllMediaMetrics.setOnClickListener { btnSendAllMediaMetrics() }
 
     }
 
@@ -47,6 +53,17 @@ class MainActivity : SuperActivity() {
     {
         callbackManager.onActivityResult(requestCode, resultCode, data)
         super.onActivityResult(requestCode, resultCode, data)
+    }
+
+    private fun initBusinessIgSDK()
+    {
+        val accessToken = AccessToken.getCurrentAccessToken()
+
+        igBusiness = IGBusinessAPI(this)
+        if(accessToken != null)
+        {
+            igBusiness.initWithToken(accessToken.token)
+        }
     }
 
     fun btnUserDataOnClickListener()
@@ -70,4 +87,16 @@ class MainActivity : SuperActivity() {
             Toast.makeText(this, "BusinessAPI not ready", Toast.LENGTH_SHORT).show()
         }
     }
+
+    fun btnSendAllMediaMetrics()
+    {
+        if(igBusiness.isReady)
+        {
+            igBusiness.getAllMediaMetrics()
+        } else
+        {
+            Toast.makeText(this, "BusinessAPI not ready", Toast.LENGTH_SHORT).show()
+        }
+    }
+
 }

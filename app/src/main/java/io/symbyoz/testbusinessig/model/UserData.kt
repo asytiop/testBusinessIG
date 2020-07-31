@@ -2,11 +2,10 @@ package io.symbyoz.testbusinessig.model
 
 import com.parse.ParseClassName
 import com.parse.ParseObject
-import com.parse.ktx.delegates.jsonArrayAttribute
-import org.json.JSONArray
+import com.parse.ktx.delegates.stringAttribute
 
 @ParseClassName("UserData")
 class UserData : ParseObject()
 {
-    var userData: JSONArray? by jsonArrayAttribute()
+    var userData: String by stringAttribute()
 }
