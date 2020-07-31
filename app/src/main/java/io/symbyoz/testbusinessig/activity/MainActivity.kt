@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import com.facebook.AccessToken
 import com.facebook.CallbackManager
 import com.facebook.login.widget.LoginButton
@@ -13,7 +14,7 @@ import io.symbyoz.testbusinessig.webservice.IGBusinessAPI
 import io.symbyoz.testbusinessig.webservice.ParseAPI
 
 
-class MainActivity : SuperActivity() {
+class MainActivity : AppCompatActivity() {
 
     private lateinit var loginButton: LoginButton
     private lateinit var callbackManager: CallbackManager
@@ -43,17 +44,21 @@ class MainActivity : SuperActivity() {
 
         loginButton.registerCallback(callbackManager, igBusiness.OnFacebookCallback())
 
-        btnUserData.setOnClickListener {btnUserDataOnClickListener()}
-        btnUserMetrics.setOnClickListener {btnUserMetricsOnClickListener()}
-        btnAllMediaMetrics.setOnClickListener { btnSendAllMediaMetrics() }
+        initButtons()
 
     }
+
+
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
     {
         callbackManager.onActivityResult(requestCode, resultCode, data)
         super.onActivityResult(requestCode, resultCode, data)
     }
+
+    //
+    // INIT METHODS
+    // ============================================================================================
 
     private fun initBusinessIgSDK()
     {
@@ -66,7 +71,17 @@ class MainActivity : SuperActivity() {
         }
     }
 
-    fun btnUserDataOnClickListener()
+    private fun initButtons()
+    {
+        btnUserData.setOnClickListener {btnUserDataOnClickListener()}
+        btnUserMetrics.setOnClickListener {btnUserMetricsOnClickListener()}
+        btnAllMediaMetrics.setOnClickListener { btnSendAllMediaMetricsOnClickListener() }
+    }
+
+    //
+    // BUTTONS LISTENERS
+    // ============================================================================================
+    private fun btnUserDataOnClickListener()
     {
         if(igBusiness.isReady)
         {
@@ -77,7 +92,7 @@ class MainActivity : SuperActivity() {
         }
     }
 
-    fun btnUserMetricsOnClickListener()
+    private fun btnUserMetricsOnClickListener()
     {
         if(igBusiness.isReady)
         {
@@ -88,7 +103,7 @@ class MainActivity : SuperActivity() {
         }
     }
 
-    fun btnSendAllMediaMetrics()
+    private fun btnSendAllMediaMetricsOnClickListener()
     {
         if(igBusiness.isReady)
         {
