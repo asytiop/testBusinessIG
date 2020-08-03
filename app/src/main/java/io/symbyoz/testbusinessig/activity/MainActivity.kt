@@ -2,7 +2,6 @@ package io.symbyoz.testbusinessig.activity
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -11,7 +10,6 @@ import com.facebook.CallbackManager
 import com.facebook.login.widget.LoginButton
 import io.symbyoz.testbusinessig.R
 import io.symbyoz.testbusinessig.webservice.IGBusinessAPI
-import io.symbyoz.testbusinessig.webservice.ParseAPI
 
 
 class MainActivity : AppCompatActivity() {
